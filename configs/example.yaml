@@ -1,0 +1,55 @@
+# Example auto-bench configuration
+# Copy this file and customize for your project.
+
+project:
+  name: "my-search-algo"
+  path: "/path/to/your/project"          # Must be a git repository
+  base_branch: "main"
+
+benchmark:
+  command: "python run_benchmark.py"      # Command to run the benchmark
+  working_dir: "."                        # Relative to project root
+  timeout: 300                            # Seconds
+  setup_command: "pip install -e ."       # Optional: run before benchmark
+
+metrics:
+  source: "json"                          # "json" | "regex" | "stdout_kv"
+  json_file: null                         # null = parse stdout as JSON
+  definitions:
+    - name: "recall_at_10"
+      json_key: "$.recall_at_10"
+      direction: "maximize"
+      threshold: 0.01                     # Minimum relative improvement
+      weight: 1.0
+    - name: "latency_p99_ms"
+      json_key: "$.latency_p99_ms"
+      direction: "minimize"
+      threshold: 0.05
+      weight: 0.5
+
+optimization:
+  max_iterations: 20
+  max_no_improve: 5
+  strategy: "single_change"              # "single_change" | "batch_change"
+  focus_files: []                        # Empty = all files in scope
+  exclude_files:
+    - "tests/**"
+    - "benchmark/**"
+
+llm:
+  model: "gpt-4o"
+  api_base: null                         # Custom API base URL (optional)
+  temperature: 0.7
+  max_tokens: 16000
+  # Per-agent overrides (optional). Unset fields fall back to the values above.
+  # optimizer:
+  #   model: "claude-sonnet-4-20250514"
+  #   api_base: "https://api.anthropic.com/v1"
+  #   api_key: "sk-ant-..."
+  #   temperature: 0.8
+  # analyzer:
+  #   model: "gpt-4o-mini"
+
+worktree:
+  base_dir: ".auto-bench-worktrees"
+  cleanup_on_finish: true
